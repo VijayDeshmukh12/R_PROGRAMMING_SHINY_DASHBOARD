@@ -1,0 +1,150 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(Hmisc)
+library(openair)
+library(forcats)
+library(dplyr)
+library(lattice)
+library(RColorBrewer)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+data(mtcars)
+
+
+```{r}
+
+
+mtcars$fcyl <- as.factor(mtcars$cyl)
+
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  # Add 3 smooth LOESS stats, varying span & color
+  stat_smooth(color = "red", span = 0.9, se = FALSE) +
+  stat_smooth(color = "green", span = 0.6, se = FALSE) +
+  stat_smooth(color = "blue", span = 0.3, se = FALSE)
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+
+### Chart E
+```{r}
+
+ggplot(mtcars, aes(fcyl, fill = fam)) +
+  # Set a dodge width of 0.5 for partially overlapping bars
+  geom_bar(position = position_dodge(width=0.5)) +
+  coord_flip()
+```
+
+
+### Chart F
+```{r}
+mtcars$car <- row.names(mtcars)
+
+# Flip the axes to set car to the y axis
+ggplot(mtcars, aes(car, wt)) +
+  geom_point() +
+  labs(x = "car", y = "weight") +
+  coord_flip()
+
+```
+
+
+### Chart G
+```{r}
+
+ggplot(mtcars, aes(x = 1, fill = fcyl)) +
+  # Reduce the bar width to 0.1
+  geom_bar(width=0.1) +
+  coord_polar(theta = "y") +
+  # Add a continuous x scale from 0.5 to 1.5
+  scale_x_continuous(limits=c(0.5, 1.5))
+```
+
+
+### Chart H
+```{r}
+
+ggplot(mtcars, aes(wt, mpg)) + 
+  geom_point() +
+  # Facet rows by am and columns by cyl
+  facet_grid(rows=vars(am), cols=vars(cyl))
+```
+### Chart I
+```{r}
+
+mtcars$fcyl_fam <- interaction(mtcars$fcyl, mtcars$fam, sep=":")
+# Update the plot
+ggplot(mtcars, aes(x = wt, y = mpg, color = fcyl_fam, size = disp)) +
+  geom_point() +
+  scale_color_brewer(palette = "Paired") +
+  # Grid facet on gear and vs
+  facet_grid(rows = vars(gear), cols = vars(vs))
+```
+
+### Chart J
+```{r}
+
+ggplot(mtcars, aes(x = mpg, y = car, color = fam)) +
+  geom_point() +
+  # Free the y scales and space
+  facet_grid(rows = vars(gear),              
+             scales = "free_y",
+             space = "free_y")
+
+```
+
+### Chart K
+```{r}
+# Make factor, set proper labels explictly
+mtcars$fam <- factor(mtcars$am, labels = c('0' = "automatic", '1' = "manual"))
+mtcars$fvs <- factor(mtcars$vs, labels = c('0' = "V-shaped", '1' = "straight"))
+
+ggplot(mtcars, aes(x = wt, y = mpg)) + 
+  geom_point() +
+  # Update the facets to only show margins on gear and fvs
+  facet_grid(rows = vars(fvs, fam), cols = vars(gear), margins = c("gear", "fvs"))
+
+```
+
+### Chart L
+```{r}
+# Update the aesthetics to color and fill by fam
+ggplot(mtcars, aes(x = fcyl, y = wt, color = fam, fill = fam)) +
+  stat_summary(fun.y = mean, geom = "bar") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1)
+
+```
+### Chart M
+```{r}
+
+
+
+# Define a dodge position object with width 0.9
+posn_d <- position_dodge(width = 0.9)
+
+# For each summary stat, update the position to posn_d
+ggplot(mtcars, aes(x = fcyl, y = wt, color = fam, fill = fam)) +
+  stat_summary(fun.y = mean, geom = "bar", position = posn_d, alpha = 0.5) +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), width = 0.1, position = posn_d, geom = "errorbar")
+```
+
+
+
+
